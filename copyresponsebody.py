@@ -42,7 +42,6 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 
         data = httpResponse[httpResponseBodyOffset:]
         data.append(13)
-        print(type(data))
         data = data.tostring()
 
         # Ugly hack because VMware is messing up the clipboard if a text is still selected, the function
