@@ -32,6 +32,9 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
         menuList = ArrayList()
 
         menuList.add(JMenuItem("Copy Response Body", actionPerformed=self.copyResponseBody))
+        menuList.add(JMenuItem("Copy Response Body & Jpeg", actionPerformed=self.copyResponseBodyJpeg))
+        menuList.add(JMenuItem("Copy Response Body & Png", actionPerformed=self.copyResponseBodyPng))
+        menuList.add(JMenuItem("Copy Response Body & Jpg", actionPerformed=self.copyResponseBodyJpg))
 
         return menuList
 
@@ -42,7 +45,77 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 
         data = httpResponse[httpResponseBodyOffset:]
         data.append(13)
-        data = data.tostring()
+        # print(type(httpResponse)) (return: array.array)
+        print(type(data))  # (return: array.array)
+
+        data = self.helpers.bytesToString(data).lstrip()
+        print(type(data))
+
+        # Ugly hack because VMware is messing up the clipboard if a text is still selected, the function
+        # has to be run in a separate thread which sleeps for 1.5 seconds.
+        t = threading.Thread(target=self.copyToClipboard, args=(data, True))
+        t.start()
+
+    def copyResponseBodyJpeg(self, event):
+        httpTraffic = self.context.getSelectedMessages()[0]
+        httpResponse = httpTraffic.getResponse()
+        httpResponseBodyOffset = self.helpers.analyzeResponse(httpResponse).getBodyOffset()
+
+        data = httpResponse[httpResponseBodyOffset:]
+        data.append(13)
+        # print(type(httpResponse)) (return: array.array)
+        # print(type(data)) (return: array.array)
+
+        # datayı unicode'a çevirir ondan sonra lstrip kullanılabilir.
+        data = self.helpers.bytesToString(data).lstrip()
+        # print(type(data)) (return: unicode)
+
+        # .jpeg to .jpeg.mp4
+        data = data.replace(".jpeg", ".jpeg.mp4")
+
+        # Ugly hack because VMware is messing up the clipboard if a text is still selected, the function
+        # has to be run in a separate thread which sleeps for 1.5 seconds.
+        t = threading.Thread(target=self.copyToClipboard, args=(data, True))
+        t.start()
+
+    def copyResponseBodyPng(self, event):
+        httpTraffic = self.context.getSelectedMessages()[0]
+        httpResponse = httpTraffic.getResponse()
+        httpResponseBodyOffset = self.helpers.analyzeResponse(httpResponse).getBodyOffset()
+
+        data = httpResponse[httpResponseBodyOffset:]
+        data.append(13)
+        # print(type(httpResponse)) (return: array.array)
+        # print(type(data)) (return: array.array)
+
+        # datayı unicode'a çevirir ondan sonra lstrip kullanılabilir.
+        data = self.helpers.bytesToString(data).lstrip()
+        # print(type(data)) (return: unicode)
+
+        # .png to .png.mp4
+        data = data.replace(".png", ".png.mp4")
+
+        # Ugly hack because VMware is messing up the clipboard if a text is still selected, the function
+        # has to be run in a separate thread which sleeps for 1.5 seconds.
+        t = threading.Thread(target=self.copyToClipboard, args=(data, True))
+        t.start()
+
+    def copyResponseBodyJpg(self, event):
+        httpTraffic = self.context.getSelectedMessages()[0]
+        httpResponse = httpTraffic.getResponse()
+        httpResponseBodyOffset = self.helpers.analyzeResponse(httpResponse).getBodyOffset()
+
+        data = httpResponse[httpResponseBodyOffset:]
+        data.append(13)
+        # print(type(httpResponse)) (return: array.array)
+        # print(type(data)) (return: array.array)
+
+        # datayı unicode'a çevirir ondan sonra lstrip kullanılabilir.
+        data = self.helpers.bytesToString(data).lstrip()
+        # print(type(data)) (return: unicode)
+
+        # .png to .png.mp4
+        data = data.replace(".jpg", ".jpg.mp4")
 
         # Ugly hack because VMware is messing up the clipboard if a text is still selected, the function
         # has to be run in a separate thread which sleeps for 1.5 seconds.
@@ -55,6 +128,8 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 
         # Fix line endings of the headers
         data = self.helpers.bytesToString(data).replace('\r\n', '\n')
+
+        data = data.decode("utf-8")
 
         with self.clipboard_lock:
             systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard()
